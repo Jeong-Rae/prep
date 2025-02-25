@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'checkstyle'
 }
 
 group = 'io.prep'
@@ -11,17 +12,35 @@ repositories {
 
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'checkstyle' // code lint
 
     repositories {
         mavenCentral()
     }
 
     dependencies {
+        // lombok
+        compileOnly 'org.projectlombok:lombok:1.18.28'
+        annotationProcessor 'org.projectlombok:lombok:1.18.28'
+
         testImplementation platform('org.junit:junit-bom:5.10.0')
         testImplementation 'org.junit.jupiter:junit-jupiter'
     }
 
     test {
         useJUnitPlatform()
+    }
+
+    checkstyle {
+        toolVersion = '10.21.2'
+        configFile = rootProject.file('checkstyle.xml')
+        ignoreFailures = false
+    }
+
+    tasks.withType(Checkstyle) {
+        reports {
+            xml.required = false
+            html.required = true
+        }
     }
 }
