@@ -7,15 +7,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URL;
+
 @Service
 @RequiredArgsConstructor
 public class ResumeUploadService {
 
     private final FileStorage fileStorage;
 
-    public String uploadAndSaveResume(MultipartFile file) {
+    public URL uploadAndSaveResume(MultipartFile file) {
         try {
-            String fileUrl = fileStorage.upload(file);
+            URL fileUrl = new URL(fileStorage.upload(file));
 
             return fileUrl;
         } catch (CoreException | InfrastructureException ex) {
