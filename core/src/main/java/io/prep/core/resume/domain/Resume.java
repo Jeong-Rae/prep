@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @Getter
 public class Resume {
-    private final UUID id = UniqueIdentityGenerator.generate();
+    private final UUID id;
 
     @NotBlank
     private final String fileName;
@@ -32,10 +32,17 @@ public class Resume {
 
 
     @Builder(toBuilder = true)
-    private Resume(final String fileName,
-                   final FileType fileType,
-                   final URL fileUrl,
-                   final LocalDateTime uploadedAt) {
+    private Resume(
+            final UUID id,
+            final String fileName,
+            final FileType fileType,
+            final URL fileUrl,
+            final LocalDateTime uploadedAt) {
+        if (id == null) {
+            this.id = UniqueIdentityGenerator.generate();
+        } else {
+            this.id = id;
+        }
         this.fileName = fileName;
         this.fileType = fileType;
         this.fileUrl = fileUrl;
