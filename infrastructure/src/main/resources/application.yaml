@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: infrastructure
+  config:
+    import: "optional:classpath:application-secret.yaml"
