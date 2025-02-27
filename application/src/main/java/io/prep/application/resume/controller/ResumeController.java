@@ -23,7 +23,7 @@ public class ResumeController {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ResumeController.class);
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<Void> uploadResume(@RequestParam("file") MultipartFile file) throws
                                                                                        URISyntaxException {
         LOGGER.info("Uploading resume file");

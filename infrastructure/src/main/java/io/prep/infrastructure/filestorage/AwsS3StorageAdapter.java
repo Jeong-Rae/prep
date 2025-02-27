@@ -2,17 +2,20 @@ package io.prep.infrastructure.filestorage;
 
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import io.prep.infrastructure.exception.ErrorCode;
 import io.prep.infrastructure.exception.InfrastructureException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Component
 @RequiredArgsConstructor
@@ -23,6 +26,8 @@ public class AwsS3StorageAdapter implements FileStorage {
     @Value("${aws.prep.infra.bucket}")
     private String bucket;
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(AwsS3StorageAdapter.class);
+
     @Override
     public String upload(MultipartFile file) {
         String fileName = file.getOriginalFilename();
@@ -30,18 +35,21 @@ public class AwsS3StorageAdapter implements FileStorage {
         objectMetadata.setContentType(file.getContentType());
         objectMetadata.setContentLength(file.getSize());
 
+        LOGGER.info(fileName);
+
         try {
+            String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
             s3Client.putObject(new PutObjectRequest(bucket,
                                                     fileName,
                                                     file.getInputStream(),
-                                                    objectMetadata).withCannedAcl(
-                    CannedAccessControlList.PublicRead));
+                                                    objectMetadata));
 
             String fileUrl = S3_FILE_URL_FORMAT.formatted(bucket,
                                                           s3Client.getRegionName(),
-                                                          fileName);
+                                                          encodedFileName);
             return fileUrl;
         } catch (IOException | SdkClientException exception) {
+            LOGGER.error(exception.getMessage());
             throw new InfrastructureException(ErrorCode.FAILED_SAVE);
         }
     }
