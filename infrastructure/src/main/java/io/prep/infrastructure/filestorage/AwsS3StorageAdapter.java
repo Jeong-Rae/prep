@@ -1,5 +1,6 @@
 package io.prep.infrastructure.filestorage;
 
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -40,7 +41,7 @@ public class AwsS3StorageAdapter implements FileStorage {
                                                           s3Client.getRegionName(),
                                                           fileName);
             return fileUrl;
-        } catch (IOException e) {
+        } catch (IOException | SdkClientException exception) {
             throw new InfrastructureException(ErrorCode.FAILED_SAVE);
         }
     }

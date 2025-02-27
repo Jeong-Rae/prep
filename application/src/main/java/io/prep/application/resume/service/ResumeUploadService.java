@@ -1,5 +1,7 @@
 package io.prep.application.resume.service;
 
+import io.prep.application.exception.ApplicationException;
+import io.prep.application.exception.ErrorCode;
 import io.prep.core.exception.CoreException;
 import io.prep.infrastructure.exception.InfrastructureException;
 import io.prep.infrastructure.filestorage.FileStorage;
@@ -20,10 +22,10 @@ public class ResumeUploadService {
             URL fileUrl = new URL(fileStorage.upload(file));
 
             return fileUrl;
-        } catch (CoreException | InfrastructureException ex) {
-            throw new RuntimeException();
-        } catch (Exception ex) {
-            throw new RuntimeException();
+        } catch (CoreException | InfrastructureException exception) {
+            throw new ApplicationException(ErrorCode.INTERNAL_SERVER_ERROR);
+        } catch (Exception exception) {
+            throw new ApplicationException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 }
