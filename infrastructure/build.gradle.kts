@@ -10,7 +10,7 @@ version = "0.0.1-SNAPSHOT"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
 }
 
@@ -29,7 +29,7 @@ extra["snippetsDir"] = file("build/generated-snippets")
 dependencies {
     implementation(project(":core"))
 
-    // AWS
+    // AWS SDK
     implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.529"))
     implementation("com.amazonaws:aws-java-sdk-s3")
 
@@ -41,6 +41,13 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+    enabled = false
+}
+tasks.getByName<Jar>("jar") {
+    enabled = true
 }
 
 tasks.withType<Test> {

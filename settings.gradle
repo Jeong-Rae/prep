@@ -1,2 +1,5 @@
-rootProject.name = 'prep'
-include("application", "core", "infrastructure")
+rootProject.name = "prep"
+
+include("application")
+include("core")
+include("infrastructure")

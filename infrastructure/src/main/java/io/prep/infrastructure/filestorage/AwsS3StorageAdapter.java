@@ -4,6 +4,7 @@ import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import io.prep.core.util.UniqueIdentityGenerator;
 import io.prep.infrastructure.exception.ErrorCode;
 import io.prep.infrastructure.exception.InfrastructureException;
 import lombok.RequiredArgsConstructor;
@@ -23,30 +24,30 @@ public class AwsS3StorageAdapter implements FileStorage {
 
     private static final String S3_FILE_URL_FORMAT = "https://%s.s3.%s.amazonaws.com/%s";
     private final AmazonS3 s3Client;
-    @Value("${aws.prep.infra.bucket}")
+    @Value("${aws.prep.infrastructure.bucket}")
     private String bucket;
 
     private final static Logger LOGGER = LoggerFactory.getLogger(AwsS3StorageAdapter.class);
 
     @Override
     public String upload(MultipartFile file) {
-        String fileName = file.getOriginalFilename();
+        String originalFilename = file.getOriginalFilename();
+        String uniqueFileName = UniqueIdentityGenerator.generate().toString();
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentType(file.getContentType());
         objectMetadata.setContentLength(file.getSize());
 
-        LOGGER.info(fileName);
-
         try {
-            String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
+            String encodedFileName = URLEncoder.encode(uniqueFileName, StandardCharsets.UTF_8);
             s3Client.putObject(new PutObjectRequest(bucket,
-                                                    fileName,
+                                                    uniqueFileName,
                                                     file.getInputStream(),
                                                     objectMetadata));
 
             String fileUrl = S3_FILE_URL_FORMAT.formatted(bucket,
                                                           s3Client.getRegionName(),
-                                                          encodedFileName);
+                                                          uniqueFileName);
+            LOGGER.info("URL: {}, OriginFileName: {}", fileUrl, originalFilename);
             return fileUrl;
         } catch (IOException | SdkClientException exception) {
             LOGGER.error(exception.getMessage());

@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: prep-application
+  config:
+    import: optional:classpath:application-secret.yaml
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO

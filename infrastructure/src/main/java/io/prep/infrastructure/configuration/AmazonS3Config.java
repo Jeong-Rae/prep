@@ -10,13 +10,13 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class AmazonS3Config {
-    @Value("${aws.prep.infra.accesskey}")
+    @Value("${aws.prep.infrastructure.accesskey}")
     private String accessKey;
 
-    @Value("${aws.prep.infra.secretkey}")
+    @Value("${aws.prep.infrastructure.secretkey}")
     private String secretKey;
 
-    @Value("${aws.prep.infra.region}")
+    @Value("${aws.prep.infrastructure.region}")
     private String region;
 
     @Bean
