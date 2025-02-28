@@ -26,7 +26,6 @@ public class ResumeController {
     @PostMapping
     public ResponseEntity<Void> uploadResume(@RequestParam("file") MultipartFile file) throws
                                                                                        URISyntaxException {
-        LOGGER.info("Uploading resume file");
         URL fileUrl = resumeUploadService.uploadAndSaveResume(file);
 
         return ResponseEntity.created(fileUrl.toURI()).build();

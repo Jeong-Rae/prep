@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -19,8 +20,8 @@ public class ResumeEntity {
     @Column(name = "resume_id", columnDefinition = "BINARY(16)", nullable = false, unique = true, updatable = false)
     private UUID id;
 
-    @Column(name = "file_name", nullable = false, unique = true)
-    private String fileName;
+    @Column(name = "filename", nullable = false, unique = true)
+    private String filename;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "file_type", nullable = false)
@@ -38,12 +39,14 @@ public class ResumeEntity {
 
     @Builder
     public ResumeEntity(final UUID id,
-                        final String fileName,
+                        final String filename,
                         final FileType fileType,
+                        final URL fileUrl,
                         final LocalDateTime uploadedAt) {
         this.id = id;
-        this.fileName = fileName;
+        this.filename = filename;
         this.fileType = fileType;
+        this.fileUrl = fileUrl.toString();
         this.uploadedAt = uploadedAt;
     }
 }

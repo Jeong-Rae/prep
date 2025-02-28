@@ -4,7 +4,9 @@ import lombok.Getter;
 
 @Getter
 public enum ErrorCode {
-    FAILED_SAVE("ERR101", "저장에 실패");
+    FAILED_SAVE("ERR101", "저장에 실패"),
+    FAILED_MAPPING("ERR102", "맵핑에 실패"),
+    ;
 
 
     private final String code;

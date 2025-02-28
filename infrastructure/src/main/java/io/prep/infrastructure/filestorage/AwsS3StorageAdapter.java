@@ -15,8 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 @Component
 @RequiredArgsConstructor
@@ -31,14 +29,13 @@ public class AwsS3StorageAdapter implements FileStorage {
 
     @Override
     public String upload(MultipartFile file) {
-        String originalFilename = file.getOriginalFilename();
+        // TODO: unique한 이름을 사용할 지, 이걸 기준으로 버전관리를 할지 판단해야함.
         String uniqueFileName = UniqueIdentityGenerator.generate().toString();
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentType(file.getContentType());
         objectMetadata.setContentLength(file.getSize());
 
         try {
-            String encodedFileName = URLEncoder.encode(uniqueFileName, StandardCharsets.UTF_8);
             s3Client.putObject(new PutObjectRequest(bucket,
                                                     uniqueFileName,
                                                     file.getInputStream(),
@@ -47,7 +44,6 @@ public class AwsS3StorageAdapter implements FileStorage {
             String fileUrl = S3_FILE_URL_FORMAT.formatted(bucket,
                                                           s3Client.getRegionName(),
                                                           uniqueFileName);
-            LOGGER.info("URL: {}, OriginFileName: {}", fileUrl, originalFilename);
             return fileUrl;
         } catch (IOException | SdkClientException exception) {
             LOGGER.error(exception.getMessage());

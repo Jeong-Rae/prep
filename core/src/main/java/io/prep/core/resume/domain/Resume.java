@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -15,11 +16,12 @@ import java.util.UUID;
 
 
 @Getter
+@ToString()
 public class Resume {
     private final UUID id;
 
     @NotBlank
-    private final String fileName;
+    private final String filename;
 
     @NotNull
     private final FileType fileType;
@@ -34,7 +36,7 @@ public class Resume {
     @Builder(toBuilder = true)
     private Resume(
             final UUID id,
-            final String fileName,
+            final String filename,
             final FileType fileType,
             final URL fileUrl,
             final LocalDateTime uploadedAt) {
@@ -43,10 +45,11 @@ public class Resume {
         } else {
             this.id = id;
         }
-        this.fileName = fileName;
+        this.filename = filename;
         this.fileType = fileType;
         this.fileUrl = fileUrl;
         this.uploadedAt = uploadedAt;
+
     }
 
     public Resume updateFileUrl(final URL fileUrl) {
