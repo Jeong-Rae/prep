@@ -15,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "resume")
-public class ResumeEntity {
+public class ResumeStorageEntity {
     @Id
     @Column(name = "resume_id", columnDefinition = "BINARY(16)", nullable = false, unique = true, updatable = false)
     private UUID id;
@@ -38,11 +38,11 @@ public class ResumeEntity {
     private LocalDateTime uploadedAt;
 
     @Builder
-    public ResumeEntity(final UUID id,
-                        final String filename,
-                        final FileType fileType,
-                        final URL fileUrl,
-                        final LocalDateTime uploadedAt) {
+    public ResumeStorageEntity(final UUID id,
+                               final String filename,
+                               final FileType fileType,
+                               final URL fileUrl,
+                               final LocalDateTime uploadedAt) {
         this.id = id;
         this.filename = filename;
         this.fileType = fileType;

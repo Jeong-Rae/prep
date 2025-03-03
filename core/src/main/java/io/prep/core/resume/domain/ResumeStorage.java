@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @Getter
 @ToString()
-public class Resume {
+public class ResumeStorage {
     private final UUID id;
 
     @NotBlank
@@ -34,7 +34,7 @@ public class Resume {
 
 
     @Builder(toBuilder = true)
-    private Resume(
+    private ResumeStorage(
             final UUID id,
             final String filename,
             final FileType fileType,
@@ -52,7 +52,7 @@ public class Resume {
 
     }
 
-    public Resume updateFileUrl(final URL fileUrl) {
+    public ResumeStorage updateFileUrl(final URL fileUrl) {
         if (fileUrl == null) {
             throw new CoreException(ErrorCode.INVALID_ARGUMENT);
         }
@@ -61,7 +61,7 @@ public class Resume {
             return this;
         }
 
-        return Resume.builder().fileUrl(fileUrl).uploadedAt(LocalDateTime.now()).build();
+        return ResumeStorage.builder().fileUrl(fileUrl).uploadedAt(LocalDateTime.now()).build();
     }
 
 }

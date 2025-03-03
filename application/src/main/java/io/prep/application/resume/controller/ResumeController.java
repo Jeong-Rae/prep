@@ -1,6 +1,6 @@
 package io.prep.application.resume.controller;
 
-import io.prep.application.resume.service.ResumeUploadService;
+import io.prep.application.resume.service.ResumeStorageService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,14 +19,14 @@ import java.net.URL;
 @RequestMapping("/api/resumes")
 public class ResumeController {
 
-    private final ResumeUploadService resumeUploadService;
+    private final ResumeStorageService resumeStorageService;
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ResumeController.class);
 
     @PostMapping
     public ResponseEntity<Void> uploadResume(@RequestParam("file") MultipartFile file) throws
                                                                                        URISyntaxException {
-        URL fileUrl = resumeUploadService.uploadAndSaveResume(file);
+        URL fileUrl = resumeStorageService.uploadAndSaveResume(file);
 
         return ResponseEntity.created(fileUrl.toURI()).build();
     }
