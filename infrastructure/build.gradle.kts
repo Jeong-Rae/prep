@@ -33,6 +33,9 @@ dependencies {
     implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.529"))
     implementation("com.amazonaws:aws-java-sdk-s3")
 
+    // openai
+    implementation("com.openai:openai-java:0.33.0")
+
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
