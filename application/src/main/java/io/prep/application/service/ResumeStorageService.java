@@ -1,4 +1,4 @@
-package io.prep.application.resume.service;
+package io.prep.application.service;
 
 import io.prep.application.exception.ApplicationException;
 import io.prep.application.exception.ErrorCode;
@@ -9,6 +9,7 @@ import io.prep.core.resume.repository.ResumeStorageRepository;
 import io.prep.core.util.FilenameUtils;
 import io.prep.infrastructure.exception.InfrastructureException;
 import io.prep.infrastructure.filestorage.FileStorage;
+import io.prep.infrastructure.llm.OpenAiLlmClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,9 +23,11 @@ import java.util.logging.Logger;
 @RequiredArgsConstructor
 public class ResumeStorageService {
 
+    private final static Logger logger = Logger.getLogger(ResumeStorageService.class.getName());
+
     private final FileStorage fileStorage;
-    private final static Logger LOGGER = Logger.getLogger(ResumeStorageService.class.getName());
     private final ResumeStorageRepository resumeStorageRepository;
+    private final OpenAiLlmClient llmClient;
 
     @Transactional
     public URL uploadAndSaveResume(MultipartFile file) {
@@ -41,6 +44,9 @@ public class ResumeStorageService {
                                                        .build();
 
             resumeStorageRepository.save(resumeStorage);
+
+            String id = llmClient.uploadFile(file);
+            logger.info(id);
 
             return fileUrl;
         } catch (CoreException | InfrastructureException exception) {
