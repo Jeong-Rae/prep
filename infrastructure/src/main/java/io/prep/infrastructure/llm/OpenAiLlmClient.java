@@ -1,9 +1,9 @@
 package io.prep.infrastructure.llm;
 
 import com.openai.client.OpenAIClient;
+import com.openai.core.http.StreamResponse;
 import com.openai.models.Thread;
 import com.openai.models.*;
-import com.openai.services.blocking.FileService;
 import com.openai.services.blocking.beta.ThreadService;
 import com.openai.services.blocking.beta.threads.RunService;
 import io.prep.infrastructure.exception.ErrorCode;
@@ -14,32 +14,30 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class OpenAiLlmClient {
     private final static Logger logger = LoggerFactory.getLogger(OpenAiLlmClient.class);
-
+    private final static String sampleFile = "D:\\prep\\infrastructure\\src\\main\\java\\io\\prep\\infrastructure\\llm\\resume.pdf";
     private final OpenAIClient openAIClient;
 
     public String uploadFile(MultipartFile file) {
         try {
-            FileService fileService = openAIClient.files();
+            FileCreateParams params = FileCreateParams.builder()
+                                                      .file(Paths.get(sampleFile))
+                                                      .purpose(FilePurpose.ASSISTANTS)
+                                                      .build();
 
-            FileObject fileObject = fileService.create(FileCreateParams.builder()
-                                                                       .file(file.getBytes())
-                                                                       .purpose(FilePurpose.ASSISTANTS)
-                                                                       .build());
-
-            fileObject.validate();
+            FileObject fileObject = openAIClient.files().create(params);
 
             return fileObject.id();
-        } catch (IOException exception) {
-            throw new InfrastructureException(ErrorCode.FAILED_CALL_LLM_API, exception);
         } catch (Exception exception) {
             logger.error(exception.getMessage());
-            throw new InfrastructureException(ErrorCode.FAILED_CALL_LLM_API, exception);
+            throw new InfrastructureException(ErrorCode.FAILED_UPLOAD_FILE_TO_LLM, exception);
         }
     }
 
@@ -57,50 +55,73 @@ public class OpenAiLlmClient {
                                                                                    .content(userMessage)
                                                                                    .role(BetaThreadCreateParams.Message.Role.USER)
                                                                                    .addAttachment(attachment)
+
                                                                                    .build();
 
 
             Thread thread = threadService.create(BetaThreadCreateParams.builder().addMessage(message).build());
-            logger.debug("Thread created: {}", thread);
-
-            thread.validate();
-
+            logger.info("Thread created: {}", thread);
 
             return thread.id();
         } catch (Exception exception) {
-            throw new InfrastructureException(ErrorCode.FAILED_CALL_LLM_API, exception);
+            throw new InfrastructureException(ErrorCode.FAILED_CREATE_THREAD, exception);
         }
     }
 
-    public void run(String assistantId, String threadId) {
+    public String runAssistant(String assistantId, String threadId) {
         try {
             RunService runService = openAIClient.beta().threads().runs();
 
-            Run run = runService.create(
+            StreamResponse<AssistantStreamEvent> streamResponse = runService.createStreaming(
                     BetaThreadRunCreateParams.builder()
                                              .threadId(threadId)
-                                             .addInclude(RunStepInclude.STEP_DETAILS_TOOL_CALLS_FILE_SEARCH_RESULTS_CONTENT)
                                              .assistantId(assistantId)
-                                             .model(ChatModel.O3_MINI)
-                                             .reasoningEffort(BetaThreadRunCreateParams.ReasoningEffort.LOW)
-                                             .temperature(1.0)
-                                             .topP(1.0)
-                                             .truncationStrategy( // 1개 메시지만 가능한 유지
-                                                                  BetaThreadRunCreateParams.TruncationStrategy.builder()
-                                                                                                              .type(BetaThreadRunCreateParams.TruncationStrategy.Type.AUTO)
-                                                                                                              .lastMessages(
-                                                                                                                      1L)
-                                                                                                              .build()
-                                             )
                                              .build()
             );
+            try (streamResponse) {
+                streamResponse.stream().forEach(event -> {
+                    if (event.isThreadRunCompleted()) {
+                        extractValue(event);
+                    } else {
+                        if (event.threadMessageDelta().isPresent()) {
+                            Optional<List<MessageContentDelta>> delta = event.threadMessageDelta()
+                                                                             .get()
+                                                                             .data()
+                                                                             .delta()
+                                                                             .content();
+                            if (delta.isPresent()) {
+                                delta.get().forEach(contentDelta -> {
+                                    if (contentDelta != null) {
+                                        if (contentDelta.isText()) {
+                                            TextDeltaBlock text = contentDelta.asText();
+                                            System.out.println(text.text().get().value());
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
+            }
 
-            run.validate();
-            logger.info("Run created: {}", run);
+            return "";
         } catch (Exception exception) {
-            throw new InfrastructureException(ErrorCode.FAILED_CALL_LLM_API, exception);
+            throw new InfrastructureException(ErrorCode.FAILED_RUN_ASSISTANT, exception);
         }
     }
 
+    private void extractValue(AssistantStreamEvent event) {
+        Message message = event.threadMessageCompleted().orElseThrow(() -> {
+            throw new InfrastructureException(ErrorCode.FAILED_EXTRACT_VALUE);
+        }).data();
+
+        message.content().forEach(content -> {
+            if (content != null) {
+                TextContentBlock text = content.asText();
+                String value = text.text().value();
+                System.out.println(value);
+            }
+        });
+    }
 
 }

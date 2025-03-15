@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URISyntaxException;
-import java.net.URL;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,9 +26,10 @@ public class ResumeController {
     @PostMapping
     public ResponseEntity<Void> uploadResume(@RequestParam("file") MultipartFile file) throws
                                                                                        URISyntaxException {
-        URL fileUrl = resumeStorageService.uploadAndSaveResume(file);
+//        URL fileUrl = resumeStorageService.uploadAndSaveResume(file);
         resumeExtractService.extractResumeFromFile(file);
 
-        return ResponseEntity.created(fileUrl.toURI()).build();
+        return ResponseEntity.ok().build();
+//        return ResponseEntity.created(fileUrl.toURI()).build();
     }
 }
